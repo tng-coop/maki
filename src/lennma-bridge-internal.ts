@@ -5,7 +5,7 @@ import { compiledForms } from './lennma-logic-compiled';
 // Declare global interfaces for JSCL and custom callbacks
 declare global {
   var jscl: any;
-  var onLennmaSearchStep: ((kNum: number, queueLen: number, currentFormLisp: any) => void) | undefined;
+  var onLennmaSearchStep: ((arg1: any, arg2: any, arg3: any, arg4?: any) => void) | undefined;
 }
 
 // Ensure JSCL is bound to globalThis (needed for script-style loading in some bundlers)
@@ -254,7 +254,21 @@ export async function runSearchProofDirect(
   const steps: SearchStep[] = [];
   
   // Register the global step callback to stream results from Lisp
-  globalThis.onLennmaSearchStep = (kNum: number, queueLen: number, currentFormLisp: any) => {
+  globalThis.onLennmaSearchStep = function (arg1: any, arg2: any, arg3: any, arg4?: any) {
+    let kNum: number;
+    let queueLen: number;
+    let currentFormLisp: any;
+
+    if (typeof arg1 === 'number') {
+      kNum = arg1;
+      queueLen = arg2;
+      currentFormLisp = arg3;
+    } else {
+      kNum = typeof arg2 === 'number' ? arg2 : 0;
+      queueLen = typeof arg3 === 'number' ? arg3 : 0;
+      currentFormLisp = arg4;
+    }
+
     let currentForm: any = null;
     try {
       currentForm = lispToJs(currentFormLisp);
