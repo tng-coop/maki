@@ -1685,6 +1685,28 @@ export const HelpModal: React.FC<HelpModalProps> = ({ section, onClose }) => {
                     <br />
                     3. **Resolution & Prolog**: Proof search algorithms (like resolution-based deduction used in logic programming languages like Prolog) directly rely on the <GlossaryTerm term="admissibility">admissibility</GlossaryTerm> of the <GlossaryTerm term="Cut rule">Cut rule</GlossaryTerm> in Gentzen systems.
                   </div>
+
+                  <div style={{
+                    background: 'rgba(168, 85, 247, 0.05)',
+                    border: '1px solid rgba(168, 85, 247, 0.15)',
+                    borderRadius: '8px',
+                    padding: '0.75rem 1.25rem',
+                    marginTop: '0.5rem',
+                    fontSize: '0.78rem',
+                    color: '#d4d4d8',
+                    lineHeight: '1.45'
+                  }}>
+                    <strong style={{ color: '#c084fc', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem' }}>
+                      <span>🧩</span> Search vs. Transformation: Why "Toy Hauptsatz"?
+                    </strong>
+                    <div>
+                      Technically, a <em>Cut Elimination</em> algorithm is a <strong>proof-transformation</strong> process &mdash; it takes a proof that already contains Cut rules (lemmas) and rewrites it into a cut-free proof.
+                      <br /><br />
+                      Our playground's engine is a <strong>proof-search</strong> engine (a theorem prover). It does not transform existing proofs. However, its entire correctness and ability to search in a finite space is <strong>completely guaranteed by the Hauptsatz</strong>. Because Gentzen proved that any theorem has a cut-free proof (and therefore satisfies the <em>Sub-formula Property</em>), we are mathematically allowed to limit our search to just the $N=6$ sub-formulas, bounding our database to 290 starting formulas.
+                      <br /><br />
+                      Without the Hauptsatz, our search space would be infinite because we would be forced to guess arbitrary intermediate lemmas (which is what allowing Cuts amounts to). Thus, the app is a <strong>simulator/visualizer for searching cut-free proofs</strong>, enabled entirely by the Hauptsatz!
+                    </div>
+                  </div>
                 </div>
 
                 {/* Cut Elimination Animated Tutorial Panel */}

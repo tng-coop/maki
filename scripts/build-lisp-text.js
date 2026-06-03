@@ -52,6 +52,6 @@ const tsContent = `// This file is auto-generated. Do not edit directly.
 export const lennmaLogicLisp = ${JSON.stringify(concatenatedLisp)};
 `;
 
-const outputPath = '/home/yasu/co/maki/src/lennma-logic-text.ts';
+const outputPath = '/home/yasu/co/toy-hauptsatz/src/lennma-logic-text.ts';
 fs.writeFileSync(outputPath, tsContent, 'utf8');
 console.log('Successfully generated lennma-logic-text.ts!');
