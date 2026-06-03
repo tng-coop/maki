@@ -52,6 +52,7 @@ export default function App() {
   const [proofSteps, setProofSteps] = useState<any[]>([]);
   const [selectedFormula, setSelectedFormula] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [guideTab, setGuideTab] = useState<'syntax' | 'engine' | 'presets'>('syntax');
 
   // Sync inputs when preset changes
   const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -313,6 +314,176 @@ export default function App() {
           </section>
 
         </main>
+
+        <footer className="glass-panel" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 'none' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>📖</span> Lennma Logic & Proof Engine Guide
+            </h2>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                onClick={() => setGuideTab('syntax')} 
+                style={{
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.8rem',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: guideTab === 'syntax' ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: guideTab === 'syntax' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                  color: guideTab === 'syntax' ? '#c084fc' : 'var(--color-text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s'
+                }}
+              >
+                Syntax & Notation
+              </button>
+              <button 
+                onClick={() => setGuideTab('engine')} 
+                style={{
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.8rem',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: guideTab === 'engine' ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: guideTab === 'engine' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                  color: guideTab === 'engine' ? '#c084fc' : 'var(--color-text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s'
+                }}
+              >
+                Proof Engine Internals
+              </button>
+              <button 
+                onClick={() => setGuideTab('presets')} 
+                style={{
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.8rem',
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: guideTab === 'presets' ? 'var(--color-primary)' : 'var(--color-border)',
+                  background: guideTab === 'presets' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                  color: guideTab === 'presets' ? '#c084fc' : 'var(--color-text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s'
+                }}
+              >
+                Inference Rules & Presets
+              </button>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.85rem', lineHeight: 1.6, color: '#d4d4d8' }}>
+            {guideTab === 'syntax' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <p>
+                  The Lennma engine reads formulas in standard Lisp S-expression prefix format. Use the notation table below to compose assumptions and targets in the Sandbox.
+                </p>
+                <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: '8px', background: 'rgba(0, 0, 0, 0.3)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'rgba(255, 255, 255, 0.02)' }}>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Lisp Syntax</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Unicode Render</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Logical Meaning</th>
+                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Example S-Expression</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace', color: '#fbbf24' }}>.l_.A</td>
+                        <td style={{ padding: '0.5rem 0.75rem' }}>A</td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)' }}>Propositional Constant / Atom</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace' }}>.l_.A</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace', color: '#c084fc' }}>(.to A B)</td>
+                        <td style={{ padding: '0.5rem 0.75rem' }}>A → B</td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)' }}>Implication (If A then B)</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace' }}>(.to .l_.A .l_.B)</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace', color: '#c084fc' }}>(.neg A)</td>
+                        <td style={{ padding: '0.5rem 0.75rem' }}>¬A</td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)' }}>Negation (Not A)</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace' }}>(.neg .l_.A)</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace', color: '#22d3ee' }}>?U</td>
+                        <td style={{ padding: '0.5rem 0.75rem' }}>U (Var)</td>
+                        <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)' }}>Logical Variable (instantiates terms during unification)</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'monospace' }}>?U</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
+                  💡 <strong>Tip:</strong> Pressing <strong>"Search & Verify Proof"</strong> compiles the formulas and starts an automated background search. You can click on the derivation tree nodes to visualize their structure as an interactive abstract syntax tree (AST).
+                </p>
+              </div>
+            )}
+
+            {guideTab === 'engine' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>1. Web Worker Compilation</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+                    Lennma's logic engine is written in Common Lisp. In the playground, the compiler (JSCL) loads precompiled Lisp forms inside a separate background Web Worker thread. This ensures the React UI remains fully responsive and animated during search operations.
+                  </p>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>2. Forward Chaining & Synthesis Queue</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                    Starting with the assumptions, the engine places formulas into a priority-sorted <em>Synthesis Queue</em>. In each iteration, it selects the most relevant formula, unifies its variables against standard inference rules, and derives immediate consequences.
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>3. Real-Time Progressive Updates</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+                    During evaluation, the Lisp engine issues callbacks to JS which send updates to the main React thread. If <em>Slow-motion Search</em> is active, the logs and queue sizes playback with a step delay to make the search progression visually understandable.
+                  </p>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>4. Derivation Tree Reconstruction</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                    Forward chaining generates many unrelated side consequences. Once the target is reached, the engine backtracks from the target to the initial assumptions, pruning dead branches to isolate the minimal natural deduction proof sequence.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {guideTab === 'presets' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Axiom II (Modus Ponens)</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+                    In the Lennma engine, Modus Ponens is defined as an inference axiom:
+                    <br />
+                    <code style={{ background: 'rgba(0,0,0,0.3)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontSize: '0.75rem', color: '#c084fc' }}>
+                      (implies (and A (implies A B)) B)
+                    </code>.
+                    <br />
+                    When the engine processes a formula $A$ and an implication $A \rightarrow B$, it triggers unification and derives $B$.
+                  </p>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Modus Ponens Preset</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                    The simplest preset: Given premises $A \rightarrow B$ and $A$, it proves $B$ in 3 iterations. It is the fundamental building block of logical reasoning.
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Transitivity Preset</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
+                    Given $A \rightarrow B$ and $B \rightarrow C$, it proves $A \rightarrow C$.
+                    The engine uses unification to link the middle term $B$. Since it's a first-order logic solver, it resolves variables by substituting expressions recursively, constructing a 3-step Modus Ponens chain.
+                  </p>
+                  <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Custom Sandbox</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                    You can specify any custom assumptions and target. For example, test double implication by using multiple `.to` nodes, and see how the synthesis queue grows and resolves!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </footer>
+
       </div>
     </>
   );
