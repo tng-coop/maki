@@ -37,6 +37,12 @@ for (const file of files) {
          (_dummy (when |A_k|_maybe
                    (report-step k-number-current (length Synthetos-Queue) (formal-node-formal |A_k|_maybe))))`;
     content = content.replace(targetString, replacement);
+
+    // Comment out the deep recursive format print statement that causes stack overflows in JSCL's standard printer
+    content = content.replace(
+      '(format t "New formal: ~A~%" (formal-node-formal |A_k|))',
+      ';(format t "New formal: ~A~%" (formal-node-formal |A_k|))'
+    );
   }
   
   concatenatedLisp += `\n;;;; File: ${file}\n` + content + '\n';
