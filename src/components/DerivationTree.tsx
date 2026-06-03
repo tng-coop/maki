@@ -114,11 +114,14 @@ export const DerivationTree: React.FC<DerivationTreeProps> = ({
       }
       
       // Try to find Modus Ponens parents:
-      // We look for a node A_i and a node A_j = (A_i -> node) in the proof steps
+      // We look for a node A_i and a node A_j = (A_i -> node) in the proof steps.
+      // Both parents must have been derived *before* the current node (strict lower kNumber) to prevent cycles.
       for (const parentA of parsedNodes) {
-        // If parentA could be the left side of MP: A
+        if (parentA.kNumber >= node.kNumber) continue;
+        
         const mpPattern = ['.TO', parentA.formal, node.formal];
         const parentB = parsedNodes.find(n => 
+          n.kNumber < node.kNumber &&
           JSON.stringify(n.formal) === JSON.stringify(mpPattern)
         );
         
