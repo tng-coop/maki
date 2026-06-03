@@ -21,11 +21,12 @@ for (const file of files) {
   
   // Inject the reporting function and hooks in gen-proof-net.lisp
   if (file === 'gen-proof-net.lisp') {
-    // Add report-step definition inside lennma-math package using jscl::oget and jscl::*global*
+    // Add report-step definition inside lennma-math package using jscl::oget and jscl::*root*
     const injection = `
 (defun report-step (k-num queue-len current-form-str)
-  (let ((js-fn (jscl::oget jscl::*global* "onLennmaSearchStep")))
-    (when js-fn
+  (let ((js-fn (jscl::oget jscl::*root* "onLennmaSearchStep")))
+    (unless (or (jscl::js-undefined-p js-fn)
+                (jscl::js-null-p js-fn))
       (funcall js-fn k-num queue-len current-form-str))))
 `;
     content = content.replace('(in-package :lennma-math)', '(in-package :lennma-math)\n' + injection);
@@ -34,7 +35,7 @@ for (const file of files) {
     const targetString = '(|A_k|_maybe (car Synthetos-Queue))';
     const replacement = `(|A_k|_maybe (car Synthetos-Queue))
          (_dummy (when |A_k|_maybe
-                   (report-step k-number-current (length Synthetos-Queue) (format nil "~S" (formal-node-formal |A_k|_maybe)))))`;
+                   (report-step k-number-current (length Synthetos-Queue) (formal-node-formal |A_k|_maybe))))`;
     content = content.replace(targetString, replacement);
   }
   

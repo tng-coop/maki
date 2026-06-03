@@ -143,6 +143,15 @@ export function lispToJs(obj: any): any {
     return null;
   }
   
+  // If it's a Lisp string, convert it to JS string using jscl's internals
+  if (typeof obj === 'object' && obj.stringp === 1) {
+    const jsclObj = (window as any).jscl || jscl;
+    if (jsclObj && jsclObj.internals && typeof jsclObj.internals.lisp_to_js === 'function') {
+      return jsclObj.internals.lisp_to_js(obj);
+    }
+    return obj;
+  }
+
   // Check if it's the NIL symbol
   if (obj && obj.name === "NIL") {
     return [];
@@ -153,20 +162,20 @@ export function lispToJs(obj: any): any {
     return true;
   }
   
-  // Check if it's a Cons cell (Lisp List)
-  if (obj && typeof obj === 'object' && '$$jscl_car' in obj) {
+  // Check if it's a Cons cell (Lisp List) using hasOwnProperty to avoid triggering Object.prototype getters
+  if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, '$$jscl_car')) {
     const arr: any[] = [];
     let current = obj;
-    while (current && current.name !== "NIL" && '$$jscl_car' in current) {
+    while (current && current.name !== "NIL" && Object.prototype.hasOwnProperty.call(current, '$$jscl_car')) {
       arr.push(lispToJs(current.$$jscl_car));
       current = current.$$jscl_cdr;
     }
     return arr;
   }
   
-  // Check if it's a Lisp Symbol
-  if (obj && typeof obj === 'object' && 'name' in obj) {
-    return obj.name;
+  // Check if it's a Lisp Symbol (recursively convert its name which is a Lisp string)
+  if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, 'name')) {
+    return lispToJs(obj.name);
   }
   
   return obj;
@@ -201,16 +210,13 @@ export async function runSearchProof(
   const steps: SearchStep[] = [];
   
   // Register the global step callback to stream results from Lisp
-  window.onLennmaSearchStep = (kNum: number, queueLen: number, currentFormStr: string) => {
-    // Parse the current formula string back to a JS structure if possible
-    // Note: currentFormStr is formatted via (format nil "~S" ...) which is Lisp print syntax.
-    let currentForm: any = currentFormStr;
+  window.onLennmaSearchStep = (kNum: number, queueLen: number, currentFormLisp: any) => {
+    let currentForm: any = null;
     try {
-      // Basic cleanup of Lisp printed nodes to display clean ASTs
-      // We can parse the Lisp print string to JS arrays for visualization
-      currentForm = parseLispStringToJs(currentFormStr);
+      currentForm = lispToJs(currentFormLisp);
     } catch (e) {
-      console.warn("Failed to parse Lisp string form:", currentFormStr);
+      console.warn("Failed to convert Lisp form to JS:", e);
+      currentForm = currentFormLisp;
     }
     
     const step: SearchStep = { kNum, queueLen, currentForm };
