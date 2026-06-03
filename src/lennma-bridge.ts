@@ -233,8 +233,9 @@ export async function runSearchProof(
     const targetLisp = `(make-formal-node :logic-type 'l^hypoaxioma :vars '() :formal '${target})`;
     
     const runCode = `
-(in-package :lennma-math)
-(multiple-value-list (search-proof *axiom-list-II* ${assumptionsLisp} ${targetLisp} :num-iter-max 1000))
+(progn
+  (in-package :lennma-math)
+  (multiple-value-list (search-proof *axiom-list-II* ${assumptionsLisp} ${targetLisp} :num-iter-max 1000)))
 `;
     
     console.log("Running Lisp Code:", runCode);
