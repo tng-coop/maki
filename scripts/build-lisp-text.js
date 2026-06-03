@@ -21,12 +21,12 @@ for (const file of files) {
   
   // Inject the reporting function and hooks in gen-proof-net.lisp
   if (file === 'gen-proof-net.lisp') {
-    // Add report-step definition at the top of the file (after in-package)
+    // Add report-step definition inside lennma-math package using jscl::oget and jscl::*global*
     const injection = `
 (defun report-step (k-num queue-len current-form-str)
-  (let ((js-fn (jscl::js-inline "typeof window !== 'undefined' ? window.onLennmaSearchStep : (typeof global !== 'undefined' && global.window ? global.window.onLennmaSearchStep : undefined)")))
-    (if (not (eq js-fn (jscl::js-inline "undefined")))
-        (funcall js-fn k-num queue-len current-form-str))))
+  (let ((js-fn (jscl::oget jscl::*global* "onLennmaSearchStep")))
+    (when js-fn
+      (funcall js-fn k-num queue-len current-form-str))))
 `;
     content = content.replace('(in-package :lennma-math)', '(in-package :lennma-math)\n' + injection);
     
