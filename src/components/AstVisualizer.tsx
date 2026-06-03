@@ -153,8 +153,28 @@ export const AstVisualizer: React.FC<AstVisualizerProps> = ({
 
   if (!expression) {
     return (
-      <div className="ast-empty">
-        <p>No expression selected to visualize</p>
+      <div className="ast-empty" style={{ flexDirection: 'column', padding: '1.25rem', textAlign: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.1rem' }}>
+          Formula AST Inspector
+        </h3>
+        <p style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)', lineHeight: 1.4, maxWidth: '320px' }}>
+          Select any formula node inside the <strong>Mathematical Derivation Proof Tree</strong> below to visualize its abstract syntax tree (AST) structure.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.75rem', textAlign: 'left', marginTop: '0.4rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.6rem', width: '100%', maxWidth: '280px' }}>
+          <div style={{ color: 'var(--color-text-secondary)', fontWeight: 600, marginBottom: '0.15rem' }}>Legend & Node Types:</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '2px', background: 'rgba(168, 85, 247, 0.2)', border: '1px solid #c084fc' }} />
+            <span style={{ color: '#e9d5ff' }}><strong>Operators</strong> (e.g., .TO, .NEG)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '2px', background: 'rgba(34, 211, 238, 0.15)', border: '1px solid #22d3ee' }} />
+            <span style={{ color: '#cffafe' }}><strong>Variables</strong> (e.g., ?U, ?X)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '2px', background: '#18181b', border: '1px solid #3f3f46' }} />
+            <span style={{ color: '#f4f4f5' }}><strong>Constants</strong> (e.g., A, B)</span>
+          </div>
+        </div>
       </div>
     );
   }
