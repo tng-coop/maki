@@ -13,6 +13,7 @@ interface AstVisualizerProps {
   title?: string;
   width?: number;
   height?: number;
+  onHelp?: () => void;
 }
 
 export const AstVisualizer: React.FC<AstVisualizerProps> = ({
@@ -20,6 +21,7 @@ export const AstVisualizer: React.FC<AstVisualizerProps> = ({
   title = "S-Expression AST",
   width = 400,
   height = 300,
+  onHelp,
 }) => {
   const treeData = useMemo(() => {
     if (!expression) return null;
@@ -181,7 +183,45 @@ export const AstVisualizer: React.FC<AstVisualizerProps> = ({
 
   return (
     <div className="ast-container">
-      <h3>{title}</h3>
+      <h3>
+        {title}
+        {onHelp && (
+          <button 
+            onClick={onHelp}
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-secondary)',
+              borderRadius: '50%',
+              width: '18px',
+              height: '18px',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginLeft: '0.5rem',
+              transition: 'all 0.2s ease',
+              verticalAlign: 'middle',
+              padding: 0
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+              e.currentTarget.style.color = '#c084fc';
+              e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border)';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+            }}
+            title="Open Help Guide"
+          >
+            ?
+          </button>
+        )}
+      </h3>
       <div className="ast-svg-wrapper">
         <svg
           viewBox={viewBox}

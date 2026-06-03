@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { runSearchProof, parseLispStringToJs, SearchStep } from './lennma-bridge';
 import { AstVisualizer } from './components/AstVisualizer';
 import { DerivationTree } from './components/DerivationTree';
+import { HelpModal } from './components/HelpModal';
 
 interface Preset {
   name: string;
@@ -53,6 +54,45 @@ export default function App() {
   const [selectedFormula, setSelectedFormula] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [guideTab, setGuideTab] = useState<'syntax' | 'engine' | 'presets'>('syntax');
+  const [helpSection, setHelpSection] = useState<string | null>(null);
+
+  // Small inline question mark help button helper
+  const HelpButton: React.FC<{ section: string }> = ({ section }) => (
+    <button 
+      onClick={() => setHelpSection(section)}
+      style={{
+        background: 'rgba(255, 255, 255, 0.04)',
+        border: '1px solid var(--color-border)',
+        color: 'var(--color-text-secondary)',
+        borderRadius: '50%',
+        width: '18px',
+        height: '18px',
+        fontSize: '0.65rem',
+        fontWeight: 700,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        marginLeft: '0.5rem',
+        transition: 'all 0.2s ease',
+        verticalAlign: 'middle',
+        padding: 0
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+        e.currentTarget.style.color = '#c084fc';
+        e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--color-border)';
+        e.currentTarget.style.color = 'var(--color-text-secondary)';
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+      }}
+      title="Open Help Guide"
+    >
+      ?
+    </button>
+  );
 
   // Sync inputs when preset changes
   const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -160,11 +200,33 @@ export default function App() {
             </div>
           </div>
           
-          <div className="maki-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-            </svg>
-            Lisp Compiler In-Browser
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button 
+              onClick={() => setHelpSection('overview')}
+              className="maki-badge"
+              style={{ 
+                cursor: 'pointer', 
+                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+                color: '#c084fc',
+                fontWeight: 600,
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
+            >
+              📖 Help & Guide
+            </button>
+            
+            <div className="maki-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              </svg>
+              Lisp Compiler In-Browser
+            </div>
           </div>
         </header>
 
@@ -173,7 +235,7 @@ export default function App() {
           {/* Column 1: Editor & Controls */}
           <section className="glass-panel">
             <div className="panel-header">
-              <h2>Proof Sandbox</h2>
+              <h2>Proof Sandbox <HelpButton section="sandbox" /></h2>
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -247,7 +309,7 @@ export default function App() {
           {/* Column 2: Tracer Console */}
           <section className="glass-panel">
             <div className="panel-header">
-              <h2>Real-Time Search logs</h2>
+              <h2>Real-Time Search logs <HelpButton section="tracer" /></h2>
               {isSearching && (
                 <div className="status-indicator">
                   <span className="status-dot" />
@@ -300,6 +362,7 @@ export default function App() {
               <AstVisualizer 
                 expression={selectedFormula} 
                 title={selectedFormula ? `AST: ${formatFormula(selectedFormula)}` : "Formula AST Inspector"}
+                onHelp={() => setHelpSection('ast')}
               />
             </div>
             
@@ -309,6 +372,7 @@ export default function App() {
                 proofSteps={proofSteps}
                 targetFormula={parseLispStringToJs(targetStr)}
                 onFormulaSelect={(formula) => setSelectedFormula(formula)}
+                onHelp={() => setHelpSection('derivation')}
               />
             </div>
           </section>
@@ -485,6 +549,10 @@ export default function App() {
         </footer>
 
       </div>
+
+      {helpSection && (
+        <HelpModal section={helpSection} onClose={() => setHelpSection(null)} />
+      )}
     </>
   );
 }

@@ -18,12 +18,14 @@ interface DerivationTreeProps {
   proofSteps: any[]; // Raw jsResult[1] which is an array of formal-node objects from Lisp
   targetFormula: any; // The target formula AST we wanted to prove
   onFormulaSelect?: (formula: any) => void;
+  onHelp?: () => void;
 }
 
 export const DerivationTree: React.FC<DerivationTreeProps> = ({
   proofSteps,
   targetFormula,
   onFormulaSelect,
+  onHelp,
 }) => {
   
   // 1. Convert Lisp formal-node objects to typed ProofNode structures
@@ -193,7 +195,45 @@ export const DerivationTree: React.FC<DerivationTreeProps> = ({
 
   return (
     <div className="proof-tree-container">
-      <h3>Mathematical Derivation Proof Tree</h3>
+      <h3>
+        Mathematical Derivation Proof Tree
+        {onHelp && (
+          <button 
+            onClick={onHelp}
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-secondary)',
+              borderRadius: '50%',
+              width: '18px',
+              height: '18px',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              marginLeft: '0.5rem',
+              transition: 'all 0.2s ease',
+              verticalAlign: 'middle',
+              padding: 0
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+              e.currentTarget.style.color = '#c084fc';
+              e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--color-border)';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+            }}
+            title="Open Help Guide"
+          >
+            ?
+          </button>
+        )}
+      </h3>
       <div className="proof-tree-scroll-wrapper">
         <div className="proof-tree-scroll-content">
           {derivationTree ? renderDerivation(derivationTree) : (
