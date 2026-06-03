@@ -234,7 +234,7 @@ export async function runSearchProof(
     
     const runCode = `
 (in-package :lennma-math)
-(multiple-value-list (search-proof *axiom-list-II* ${assumptionsLisp} ${targetLisp} :num-iter-max 300))
+(multiple-value-list (search-proof *axiom-list-II* ${assumptionsLisp} ${targetLisp} :num-iter-max 1000))
 `;
     
     console.log("Running Lisp Code:", runCode);
