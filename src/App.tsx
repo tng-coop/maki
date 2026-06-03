@@ -191,9 +191,9 @@ export default function App() {
       <div className="playground-container">
         <header>
           <div className="header-title-row">
-            <div className="logo-icon-sm">L</div>
+            <div className="logo-icon-sm">T</div>
             <div>
-              <h1>Lennma Logic Playground</h1>
+              <h1>Toy Hauptsatz Playground</h1>
               <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                 Common Lisp Mathematical Verification & Proof Visualizer (JSCL Client-Side compilation)
               </p>
@@ -387,7 +387,7 @@ export default function App() {
         <footer className="glass-panel" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.2rem' }}>📖</span> Lennma Logic & Proof Engine Guide
+              <span style={{ fontSize: '1.2rem' }}>📖</span> Toy Hauptsatz Logic & Proof Engine Guide
             </h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button 
@@ -448,7 +448,7 @@ export default function App() {
             {guideTab === 'syntax' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <p>
-                  The Lennma engine reads formulas in standard Lisp S-expression prefix format. Use the notation table below to compose assumptions and targets in the Sandbox.
+                  The Toy Hauptsatz engine reads formulas in standard Lisp S-expression prefix format. Use the notation table below to compose assumptions and targets in the Sandbox.
                 </p>
                 <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: '8px', background: 'rgba(0, 0, 0, 0.3)' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.8rem' }}>
@@ -499,7 +499,7 @@ export default function App() {
                 <div>
                   <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>1. Web Worker Compilation</h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-                    Lennma's logic engine is written in Common Lisp. In the playground, the compiler (JSCL) loads precompiled Lisp forms inside a separate background Web Worker thread. This ensures the React UI remains fully responsive and animated during search operations.
+                    Toy Hauptsatz's logic engine is written in Common Lisp. In the playground, the compiler (JSCL) loads precompiled Lisp forms inside a separate background Web Worker thread. This ensures the React UI remains fully responsive and animated during search operations.
                   </p>
                   <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>2. Forward Chaining & Synthesis Queue</h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
@@ -524,7 +524,7 @@ export default function App() {
                 <div>
                   <h4 style={{ color: 'var(--color-text-primary)', fontWeight: 600, marginBottom: '0.4rem' }}>Axiom II (Modus Ponens)</h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-                    In the Lennma engine, Modus Ponens is defined as an inference axiom:
+                    In the Toy Hauptsatz engine, Modus Ponens is defined as an inference axiom:
                     <br />
                     <code style={{ background: 'rgba(0,0,0,0.3)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontSize: '0.75rem', color: '#c084fc' }}>
                       (implies (and A (implies A B)) B)
