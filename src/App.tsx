@@ -88,7 +88,8 @@ export default function App() {
         let currentStepIdx = 0;
         const intervalId = window.setInterval(() => {
           if (currentStepIdx < result.steps.length) {
-            setLogs(prev => [...prev, result.steps[currentStepIdx]]);
+            const stepToAdd = result.steps[currentStepIdx];
+            setLogs(prev => [...prev, stepToAdd]);
             currentStepIdx++;
           } else {
             window.clearInterval(intervalId);
