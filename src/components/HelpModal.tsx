@@ -8,10 +8,65 @@ interface HelpModalProps {
 export const HelpModal: React.FC<HelpModalProps> = ({ section, onClose }) => {
   const [activeTab, setActiveTab] = React.useState<string>(section);
   const [animStep, setAnimStep] = React.useState<number>(0);
+  const [isPlayingAudio, setIsPlayingAudio] = React.useState<boolean>(false);
+  const speechUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
+
+  const spokenSummaries: Record<string, string> = {
+    overview: "Welcome to the Lennma Logic Playground. Here, we run a Lisp-based automated theorem prover directly in your browser. This tool helps mathematically prove that a target formula is a logical consequence of your assumptions. To get started, select a preset template like Transitivity, turn on Slow-motion Search to watch the steps, and click Search and Verify. You can then click the proof tree nodes to visualize their structures.",
+    sandbox: "The Proof Sandbox is where you write your starting assumptions and your target conclusion. The sandbox parses standard prefix Lisp formulas. For constants, prefix them with dot L dot, such as dot L dot A. Implication is written as dot to, negation as dot neg, and logic variables start with a question mark. For example, to prove modus ponens, enter dot to A B and A as assumptions, and B as your target.",
+    tracer: "The Real-Time Tracer shows how the forward-chaining engine works. Think of it like a chain of dominos. We put our starting facts into a priority-sorted Synthesis Queue. In each turn, the engine pulls the simplest fact from the line, unifies it with available inference rules in the Logic Mixer, and generates new consequences. Once the target is synthesized, the proof terminates successfully.",
+    ast: "The Formula AST Inspector visualizes the abstract syntax tree of a formula. It shows how complex formulas are broken down hierarchically. The top node displays the main operator like implication or negation, branching down into sub-formulas. Operators are colored purple, variables are cyan, and constants are white.",
+    derivation: "The Mathematical Derivation Proof Tree renders the final proof using a natural deduction Gentzen layout. It is read from top to bottom. The leaves at the very top are your starting assumptions. The horizontal lines represent reasoning steps, with the logical rules applied shown to the right, leading down to the final target conclusion at the bottom. You can click any box in the tree to load its syntax structure into the inspector above.",
+    internals: "The engine runs in Lisp, compiled to Javascript via JSCL, and runs inside a background Web Worker. This prevents the browser page from freezing during search, sending progress updates back to the React UI in real-time."
+  };
+
+  const handlePlayAudio = () => {
+    if (!window.speechSynthesis) {
+      alert("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    const textToSpeak = spokenSummaries[activeTab] || "";
+    if (!textToSpeak) return;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = 'en-US';
+    utterance.onend = () => {
+      setIsPlayingAudio(false);
+    };
+    utterance.onerror = () => {
+      setIsPlayingAudio(false);
+    };
+
+    speechUtteranceRef.current = utterance;
+    setIsPlayingAudio(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   React.useEffect(() => {
     setActiveTab(section);
   }, [section]);
+
+  React.useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlayingAudio(false);
+  }, [activeTab]);
+
+  React.useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -142,25 +197,47 @@ export const HelpModal: React.FC<HelpModalProps> = ({ section, onClose }) => {
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             borderBottom: '1px solid var(--color-border)',
             paddingBottom: '1rem'
           }}>
-            <div>
-              <h1 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #ffffff 0%, #c084fc 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                margin: 0
-              }}>
-                {tabs.find(t => t.id === activeTab)?.title}
-              </h1>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-                Detailed explanation and walkthrough of the feature
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div>
+                <h1 style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1.4rem',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #ffffff 0%, #c084fc 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  margin: 0
+                }}>
+                  {tabs.find(t => t.id === activeTab)?.title}
+                </h1>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', margin: 0 }}>
+                  Detailed explanation and walkthrough of the feature
+                </p>
+              </div>
+              
+              <button 
+                onClick={handlePlayAudio}
+                style={{
+                  background: isPlayingAudio ? 'rgba(168, 85, 247, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                  border: isPlayingAudio ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
+                  color: isPlayingAudio ? '#c084fc' : 'var(--color-text-secondary)',
+                  borderRadius: '8px',
+                  padding: '0.4rem 0.8rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <span>{isPlayingAudio ? '⏹️ Stop Audio' : '🔊 Play Aloud'}</span>
+              </button>
             </div>
             <button 
               onClick={onClose} 
