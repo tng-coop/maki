@@ -13,6 +13,101 @@ declare global {
 // Ensure JSCL is bound to window (needed for script-style loading in some bundlers)
 window.jscl = jscl;
 
+/**
+ * Splits a concatenated Lisp codebase string into separate top-level forms.
+ * Respects parentheses nesting, comments, strings, and escaped quotes.
+ */
+export function splitLispForms(lispStr: string): string[] {
+  const forms: string[] = [];
+  let currentForm = '';
+  let parenCount = 0;
+  let inString = false;
+  let inLineComment = false;
+  let blockCommentDepth = 0;
+  let escape = false;
+
+  for (let i = 0; i < lispStr.length; i++) {
+    const char = lispStr[i];
+
+    if (inLineComment) {
+      if (char === '\n' || char === '\r') {
+        inLineComment = false;
+      }
+      continue;
+    }
+
+    if (blockCommentDepth > 0) {
+      if (char === '|' && i + 1 < lispStr.length && lispStr[i+1] === '#') {
+        blockCommentDepth--;
+        i++; // skip '#'
+      } else if (char === '#' && i + 1 < lispStr.length && lispStr[i+1] === '|') {
+        blockCommentDepth++;
+        i++; // skip '|'
+      }
+      continue;
+    }
+
+    if (inString) {
+      currentForm += char;
+      if (escape) {
+        escape = false;
+      } else if (char === '\\') {
+        escape = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    // Check for comment starting characters
+    if (char === ';') {
+      inLineComment = true;
+      continue;
+    }
+
+    if (char === '#' && i + 1 < lispStr.length && lispStr[i+1] === '|') {
+      blockCommentDepth = 1;
+      i++; // skip '|'
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      currentForm += char;
+      continue;
+    }
+
+    currentForm += char;
+
+    if (char === '(') {
+      parenCount++;
+    } else if (char === ')') {
+      parenCount--;
+      if (parenCount === 0) {
+        const trimmed = currentForm.trim();
+        if (trimmed) {
+          forms.push(trimmed);
+        }
+        currentForm = '';
+      }
+    } else if (parenCount === 0 && /\S/.test(char)) {
+      let j = i + 1;
+      while (j < lispStr.length && !/\s/.test(lispStr[j])) {
+        currentForm += lispStr[j];
+        j++;
+      }
+      i = j - 1;
+      const trimmed = currentForm.trim();
+      if (trimmed) {
+        forms.push(trimmed);
+      }
+      currentForm = '';
+    }
+  }
+
+  return forms;
+}
+
 let isLennmaInitialized = false;
 
 /**
@@ -25,8 +120,12 @@ export function initLennma() {
   try {
     console.log("Initializing Lennma Lisp Engine...");
     
-    // Evaluate the concatenated Lisp codebase
-    jscl.evaluateString(lennmaLogicLisp);
+    // Split the logic string into separate top-level forms and load them one by one
+    const forms = splitLispForms(lennmaLogicLisp);
+    console.log(`Split Lisp logic into ${forms.length} forms. Compiling...`);
+    for (let idx = 0; idx < forms.length; idx++) {
+      jscl.evaluateString(forms[idx]);
+    }
     
     isLennmaInitialized = true;
     console.log("Lennma Lisp Engine initialized successfully!");

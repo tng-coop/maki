@@ -4,7 +4,9 @@ import path from 'path';
 const srcDir = '/home/yasu/co/lennma-math/src';
 const files = [
   'package.lisp',
+  'tidtid.lisp',
   'utils.lisp',
+  'lisp1.lisp',
   'pat-match.lisp',
   'formal-system_1.lisp',
   'axioms_1.lisp',
@@ -22,8 +24,8 @@ for (const file of files) {
     // Add report-step definition at the top of the file (after in-package)
     const injection = `
 (defun report-step (k-num queue-len current-form-str)
-  (let ((js-fn (#j:window.onLennmaSearchStep)))
-    (if (not (eql js-fn (#j:undefined)))
+  (let ((js-fn (jscl::js-inline "typeof window !== 'undefined' ? window.onLennmaSearchStep : (typeof global !== 'undefined' && global.window ? global.window.onLennmaSearchStep : undefined)")))
+    (if (not (eq js-fn (jscl::js-inline "undefined")))
         (funcall js-fn k-num queue-len current-form-str))))
 `;
     content = content.replace('(in-package :lennma-math)', '(in-package :lennma-math)\n' + injection);
