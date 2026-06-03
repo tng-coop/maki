@@ -7,10 +7,18 @@ interface HelpModalProps {
 
 export const HelpModal: React.FC<HelpModalProps> = ({ section, onClose }) => {
   const [activeTab, setActiveTab] = React.useState<string>(section);
+  const [animStep, setAnimStep] = React.useState<number>(0);
 
   React.useEffect(() => {
     setActiveTab(section);
   }, [section]);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimStep(prev => (prev + 1) % 5);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
 
   const tabs = [
     { id: 'overview', label: '🏠 Overview', title: 'Lennma Logic Playground Overview' },
@@ -259,37 +267,181 @@ export const HelpModal: React.FC<HelpModalProps> = ({ section, onClose }) => {
             )}
 
             {activeTab === 'tracer' && (
-              <>
-                <p>
-                  The <strong>Real-Time Search Logs</strong> panel displays the inner workings of the Lisp proof engine as it performs the proof search.
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <p style={{ margin: 0 }}>
+                  Imagine a logical chain of dominos. If you know fact <strong>A</strong> is true, and you know <strong>A → B</strong> (if A is true, then B is true), you can deduce that <strong>B</strong> must also be true.
                 </p>
-                <h3 style={{ color: 'var(--color-text-primary)', fontSize: '1.05rem', fontWeight: 600, borderLeft: '3px solid var(--color-primary)', paddingLeft: '0.5rem', marginTop: '0.5rem' }}>
-                  Forward Chaining & The Synthesis Queue
+
+                {/* Animated Graphic Box */}
+                <div style={{
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  borderRadius: '12px',
+                  border: '1px solid var(--color-border)',
+                  padding: '1rem 1.5rem',
+                  height: '170px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  marginTop: '0.5rem'
+                }}>
+                  {/* Column 1: Input Facts */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', zIndex: 2, width: '90px' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Premises</div>
+                    <div style={{ height: '70px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.5rem' }}>
+                      <div style={{
+                        padding: '0.3rem 0.6rem',
+                        background: 'rgba(34, 211, 238, 0.12)',
+                        border: '1px solid #22d3ee',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontFamily: 'monospace',
+                        color: '#cffafe',
+                        transition: 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+                        position: 'absolute',
+                        left: animStep === 0 ? '40px' : animStep === 1 ? '160px' : animStep === 2 ? '160px' : '-100px',
+                        top: animStep === 0 ? '60px' : '80px',
+                        transform: (animStep === 1 || animStep === 2) ? 'translateX(-50%)' : 'none',
+                        opacity: animStep === 3 ? 0 : 1
+                      }}>
+                        A
+                      </div>
+                      <div style={{
+                        padding: '0.3rem 0.6rem',
+                        background: 'rgba(168, 85, 247, 0.15)',
+                        border: '1px solid #c084fc',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontFamily: 'monospace',
+                        color: '#e9d5ff',
+                        transition: 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+                        position: 'absolute',
+                        left: animStep <= 1 ? '40px' : animStep === 2 ? '160px' : '-100px',
+                        top: animStep <= 1 ? '100px' : '80px',
+                        transform: animStep === 2 ? 'translateX(-50%)' : 'none',
+                        opacity: animStep === 3 ? 0 : 1
+                      }}>
+                        A → B
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Flow Arrow 1 */}
+                  <div style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '1.25rem', userSelect: 'none' }}>➔</div>
+
+                  {/* Column 2: Unification Mixer */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', zIndex: 2, position: 'relative' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Logic Mixer</div>
+                    <div style={{
+                      width: '74px',
+                      height: '74px',
+                      borderRadius: '50%',
+                      border: animStep === 2 ? '2px dashed #a855f7' : '2px dashed rgba(255, 255, 255, 0.15)',
+                      background: animStep === 2 ? 'rgba(168, 85, 247, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.25rem',
+                      animation: animStep === 2 ? 'spin 6s linear infinite, pulse 1.2s infinite alternate' : 'none',
+                      color: animStep === 2 ? '#c084fc' : 'var(--color-text-secondary)',
+                      transition: 'all 0.4s'
+                    }}>
+                      {animStep === 2 ? '🌀' : '⚙️'}
+                    </div>
+                    {/* Floating Result Node */}
+                    <div style={{
+                      padding: '0.3rem 0.6rem',
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      border: '1px solid #10b981',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontFamily: 'monospace',
+                      color: '#d1fae5',
+                      transition: 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+                      position: 'absolute',
+                      left: animStep <= 2 ? '80px' : animStep === 3 ? '260px' : animStep === 4 ? '260px' : '80px',
+                      top: '52px',
+                      transform: 'translateX(-50%)',
+                      opacity: animStep <= 2 ? 0 : 1,
+                      boxShadow: animStep === 4 ? '0 0 12px rgba(16, 185, 129, 0.4)' : 'none',
+                      fontWeight: animStep === 4 ? 700 : 'normal'
+                    }}>
+                      B
+                    </div>
+                  </div>
+
+                  {/* Flow Arrow 2 */}
+                  <div style={{ color: 'rgba(255, 255, 255, 0.15)', fontSize: '1.25rem', userSelect: 'none' }}>➔</div>
+
+                  {/* Column 3: The Queue */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', zIndex: 2, width: '90px' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Consequences</div>
+                    <div style={{ height: '70px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      {/* Empty slot placeholder */}
+                      <div style={{
+                        width: '60px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        border: animStep === 4 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px dashed rgba(255, 255, 255, 0.08)',
+                        background: animStep === 4 ? 'rgba(16, 185, 129, 0.04)' : 'transparent',
+                        transition: 'all 0.4s'
+                      }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Animated Status Description */}
+                <div style={{
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid var(--color-border)',
+                  fontSize: '0.82rem',
+                  color: '#e4e4e7',
+                  minHeight: '54px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s'
+                }}>
+                  <span style={{ fontSize: '1rem' }}>
+                    {animStep === 0 && '⚙️'}
+                    {animStep === 1 && '📥'}
+                    {animStep === 2 && '🌀'}
+                    {animStep === 3 && '📤'}
+                    {animStep === 4 && '🎉'}
+                  </span>
+                  <span>
+                    {animStep === 0 && 'The engine starts with the facts you entered (Premises), sitting in the queue.'}
+                    {animStep === 1 && '1. Pull: The engine takes the simplest fact out of the queue (Fact A) to evaluate it.'}
+                    {animStep === 2 && '2. Combine: The engine mixes and unifies Fact A with the rule (A → B) in the Logic Mixer.'}
+                    {animStep === 3 && '3. Conclude: A new fact, B, is derived and added to the waiting list.'}
+                    {animStep === 4 && '4. Goal Reached! Fact B matches our Target. The proof is complete!'}
+                  </span>
+                </div>
+
+                <h3 style={{ color: 'var(--color-text-primary)', fontSize: '1rem', fontWeight: 600, borderLeft: '3px solid var(--color-primary)', paddingLeft: '0.5rem', marginTop: '0.5rem', margin: '0.5rem 0 0 0' }}>
+                  What the Prover is Doing
                 </h3>
-                <p>
-                  Rather than proving the goal backwards, the prover uses a **forward-chaining synthesis algorithm**:
+                <p style={{ margin: 0 }}>
+                  Instead of guessing or thinking backwards, the prover uses **forward chaining** (mixing known facts to synthesize new ones):
                 </p>
-                <ol style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: 0, fontSize: '0.85rem', color: '#d4d4d8' }}>
                   <li>
-                    <strong>Seed Phase</strong>: The search queue is initialized with the initial assumptions plus pre-generated instances of general logical axioms.
+                    <strong>Waiting Line (Queue)</strong>: All derived facts wait in a queue, sorted from simplest to most complex.
                   </li>
                   <li>
-                    <strong>Queue Prioritization</strong>: The engine maintains a priority-sorted *Synthesis Queue*. In each iteration, it pulls out the most promising formula (typically the simplest or most relevant).
+                    <strong>Taking Turns</strong>: Each turn (Iteration), the engine takes the first fact out of the queue.
                   </li>
                   <li>
-                    <strong>Inference Phase</strong>: It unifies the selected formula with available inference rules to derive *immediate consequences* (new true formulas).
+                    <strong>Mixing</strong>: It unifies variables and mixes that fact with logical rules to produce new immediate consequences.
                   </li>
                   <li>
-                    <strong>Step Log</strong>: The log shows:
-                    <br />
-                    - <code>Iteration #N</code>: The current step count.
-                    <br />
-                    - <code>Queue size: X</code>: The number of active derived formulas currently waiting in the priority queue.
-                    <br />
-                    - <code>Inspecting state: A</code>: The formula pulled from the queue and analyzed during this iteration.
+                    <strong>Logs</strong>: The Tracer console shows <code>Iteration #N</code> (current step count), <code>Queue size: X</code> (how many facts are waiting), and <code>Inspecting state: A</code> (the current fact being evaluated).
                   </li>
-                </ol>
-              </>
+                </ul>
+              </div>
             )}
 
             {activeTab === 'ast' && (

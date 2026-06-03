@@ -444,3 +444,24 @@ header h1 {
   color: var(--color-text-secondary);
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 5px rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.4); }
+  to { box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); border-color: #a855f7; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+
