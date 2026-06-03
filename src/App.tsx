@@ -47,6 +47,7 @@ export default function App() {
   const [targetStr, setTargetStr] = useState<string>(PRESETS.transitivity.target);
   
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [slowMo, setSlowMo] = useState<boolean>(false);
   const [logs, setLogs] = useState<SearchStep[]>([]);
   const [proofSteps, setProofSteps] = useState<any[]>([]);
   const [selectedFormula, setSelectedFormula] = useState<any>(null);
@@ -80,28 +81,51 @@ export default function App() {
     const target = targetStr.trim();
     
     try {
-      const result = await runSearchProof(assumptions, target, (step) => {
-        // Stream search iterations to console
-        setLogs(prev => [...prev, step]);
-      });
+      // Run the worker proof search (which completes instantly)
+      const result = await runSearchProof(assumptions, target);
       
-      if (result.success) {
-        setProofSteps(result.proofSteps);
-        
-        // Find the goal node's formula shape to display first in AST visualizer
-        if (result.proofSteps.length > 0) {
-          // The first node in proofSteps is the goal node
-          const goalNode = result.proofSteps[0];
-          if (goalNode && goalNode.formal) {
-            setSelectedFormula(goalNode.formal);
+      if (slowMo && result.steps.length > 0) {
+        let currentStepIdx = 0;
+        const intervalId = window.setInterval(() => {
+          if (currentStepIdx < result.steps.length) {
+            setLogs(prev => [...prev, result.steps[currentStepIdx]]);
+            currentStepIdx++;
+          } else {
+            window.clearInterval(intervalId);
+            setIsSearching(false);
+            
+            if (result.success) {
+              setProofSteps(result.proofSteps);
+              if (result.proofSteps.length > 0) {
+                const goalNode = result.proofSteps[0];
+                if (goalNode && goalNode.formal) {
+                  setSelectedFormula(goalNode.formal);
+                }
+              }
+            } else {
+              setErrorMsg(result.error || "Search finished without finding a valid proof path.");
+            }
           }
-        }
+        }, 30); // 30ms per step playback
       } else {
-        setErrorMsg(result.error || "Search finished without finding a valid proof path.");
+        // Instant presentation
+        setLogs(result.steps);
+        setIsSearching(false);
+        
+        if (result.success) {
+          setProofSteps(result.proofSteps);
+          if (result.proofSteps.length > 0) {
+            const goalNode = result.proofSteps[0];
+            if (goalNode && goalNode.formal) {
+              setSelectedFormula(goalNode.formal);
+            }
+          }
+        } else {
+          setErrorMsg(result.error || "Search finished without finding a valid proof path.");
+        }
       }
     } catch (e: any) {
       setErrorMsg(e?.toString() || "Unexpected execution error.");
-    } finally {
       setIsSearching(false);
     }
   };
@@ -189,7 +213,23 @@ export default function App() {
                 disabled={isSearching}
               />
             </div>
-            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', marginTop: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="slow-mo-checkbox" 
+                checked={slowMo} 
+                onChange={(e) => setSlowMo(e.target.checked)}
+                disabled={isSearching}
+                style={{ cursor: 'pointer', width: '1rem', height: '1rem' }}
+              />
+              <label 
+                htmlFor="slow-mo-checkbox" 
+                style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}
+              >
+                Slow-motion Search (30ms step delay)
+              </label>
+            </div>
+
             <button className="btn-primary" onClick={handleRun} disabled={isSearching}>
               {isSearching ? (
                 <>

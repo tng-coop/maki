@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { lispToJs } from '../lennma-bridge';
 
 interface ProofNode {
   logicType: string;
@@ -30,13 +31,14 @@ export const DerivationTree: React.FC<DerivationTreeProps> = ({
     if (!proofSteps) return [];
     
     return proofSteps.map((node: any) => {
+      console.log("Maki Node keys:", Object.keys(node), node);
       // Extract properties based on JSCL structure bindings
       // A formal-node is a JS object/structure with compiled properties
       return {
-        logicType: node.logic_type?.name || 'L^HYPOTHESIS',
-        kNumber: typeof node.k_number === 'number' ? node.k_number : -1,
-        vars: Array.isArray(node.vars) ? node.vars : [],
-        formal: node.formal
+        logicType: lispToJs(node['LOGIC-TYPE0']) || 'L^HYPOTHESIS',
+        kNumber: typeof node['K-NUMBER1'] === 'number' ? node['K-NUMBER1'] : -1,
+        vars: lispToJs(node['VARS2']) || [],
+        formal: lispToJs(node['FORMAL3'])
       };
     });
   }, [proofSteps]);

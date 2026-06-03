@@ -2,16 +2,14 @@
 import jscl from 'jscl';
 import { compiledForms } from './lennma-logic-compiled';
 
-// Declare window interfaces for JSCL and custom callbacks
+// Declare global interfaces for JSCL and custom callbacks
 declare global {
-  interface Window {
-    jscl: any;
-    onLennmaSearchStep?: (kNum: number, queueLen: number, currentFormStr: string) => void;
-  }
+  var jscl: any;
+  var onLennmaSearchStep: ((kNum: number, queueLen: number, currentFormLisp: any) => void) | undefined;
 }
 
-// Ensure JSCL is bound to window (needed for script-style loading in some bundlers)
-window.jscl = jscl;
+// Ensure JSCL is bound to globalThis (needed for script-style loading in some bundlers)
+globalThis.jscl = jscl;
 
 /**
  * Splits a concatenated Lisp codebase string into separate top-level forms.
@@ -193,7 +191,7 @@ export function lispToJs(obj: any): any {
   
   // If it's a Lisp string, convert it to JS string using jscl's internals
   if (typeof obj === 'object' && obj.stringp === 1) {
-    const jsclObj = (window as any).jscl || jscl;
+    const jsclObj = globalThis.jscl || jscl;
     if (jsclObj && jsclObj.internals && typeof jsclObj.internals.lisp_to_js === 'function') {
       return jsclObj.internals.lisp_to_js(obj);
     }
@@ -244,48 +242,82 @@ export interface ProofResult {
 
 /**
  * Executes a proof search in the browser using the JSCL Lennma math engine.
- * @param assumptions List of Lisp format assumptions, e.g., ["(.to .l_.A .l_.B)", ".l_.A"]
- * @param target The target formula to prove, e.g., ".l_.B"
- * @param onStep Optional callback to receive steps in real time
+ * Runs directly on the current thread (to be called inside the worker).
  */
-export async function runSearchProof(
+export async function runSearchProofDirect(
   assumptions: string[],
   target: string,
   onStep?: (step: SearchStep) => void
 ): Promise<ProofResult> {
-  return new Promise((resolve, reject) => {
+  initLennma();
+  
+  const steps: SearchStep[] = [];
+  
+  // Register the global step callback to stream results from Lisp
+  globalThis.onLennmaSearchStep = (kNum: number, queueLen: number, currentFormLisp: any) => {
+    let currentForm: any = null;
     try {
-      const worker = new Worker(
-        new URL('./search.worker.ts', import.meta.url),
-        { type: 'module' }
-      );
-      
-      worker.onmessage = (e) => {
-        const { type, step, result } = e.data;
-        if (type === 'step') {
-          if (onStep && step) {
-            onStep(step);
-          }
-        } else if (type === 'result') {
-          worker.terminate();
-          resolve(result);
-        }
-      };
-      
-      worker.onerror = (err) => {
-        worker.terminate();
-        reject(err);
-      };
-      
-      worker.postMessage({ assumptions, target });
-    } catch (err) {
-      reject(err);
+      currentForm = lispToJs(currentFormLisp);
+    } catch (e) {
+      console.warn("Failed to convert Lisp form to JS:", e);
+      currentForm = currentFormLisp;
     }
-  });
+    
+    const step: SearchStep = { kNum, queueLen, currentForm };
+    steps.push(step);
+    if (onStep) {
+      onStep(step);
+    }
+  };
+  
+  try {
+    // Build the Lisp code to evaluate
+    const assumptionsLisp = `(list ${assumptions.map(a => `(make-formal-node :logic-type 'l^hypoaxioma :vars '() :formal '${a})`).join(' ')})`;
+    const targetLisp = `(make-formal-node :logic-type 'l^hypoaxioma :vars '() :formal '${target})`;
+    
+    const runCode = `
+(progn
+  (in-package :lennma-math)
+  (multiple-value-list (search-proof *axiom-list-II* ${assumptionsLisp} ${targetLisp} :num-iter-max 1000)))
+`;
+    
+    console.log("Running Lisp Code:", runCode);
+    const rawResult = jscl.evaluateString(runCode);
+    
+    // rawResult is a Lisp list containing [goal_node, proof_list]
+    const jsResult = lispToJs(rawResult);
+    console.log("Raw Lisp Search Result:", jsResult);
+    
+    if (jsResult && jsResult.length > 0 && jsResult[0] !== "NIL") {
+      return {
+        success: true,
+        steps,
+        proofSteps: jsResult[1] || []
+      };
+    } else {
+      return {
+        success: false,
+        steps,
+        proofSteps: [],
+        error: "Proof search failed (target unreachable within iteration limit)."
+      };
+    }
+  } catch (error: any) {
+    console.error("Error during proof search:", error);
+    return {
+      success: false,
+      steps,
+      proofSteps: [],
+      error: error?.toString() || "Unknown execution error."
+    };
+  } finally {
+    // Clean up callback
+    delete globalThis.onLennmaSearchStep;
+  }
 }
 
 /**
- * Basic parser to convert a printed Lisp string (e.g. "(.TO .L_.A .L_.B)") back to JS nested arrays.
+ * Basic parser to convert a printed Lisp string back to JS nested arrays.
  */
 export function parseLispStringToJs(lispStr: string): any {
   let pos = 0;
@@ -324,7 +356,6 @@ export function parseLispStringToJs(lispStr: string): any {
     }
     const token = lispStr.substring(start, pos);
     
-    // Convert numbers if numeric
     if (/^-?\d+(\.\d+)?$/.test(token)) {
       return Number(token);
     }
