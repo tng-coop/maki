@@ -289,10 +289,20 @@ export async function runSearchProofDirect(
     console.log("Raw Lisp Search Result:", jsResult);
     
     if (jsResult && jsResult.length > 0 && jsResult[0] !== "NIL") {
+      const rawProofSteps = jsResult[1] || [];
+      const serializedProofSteps = rawProofSteps.map((node: any) => {
+        if (!node) return null;
+        return {
+          'LOGIC-TYPE0': lispToJs(node['LOGIC-TYPE0']),
+          'K-NUMBER1': typeof node['K-NUMBER1'] === 'number' ? node['K-NUMBER1'] : -1,
+          'VARS2': lispToJs(node['VARS2']),
+          'FORMAL3': lispToJs(node['FORMAL3'])
+        };
+      }).filter(Boolean);
       return {
         success: true,
         steps,
-        proofSteps: jsResult[1] || []
+        proofSteps: serializedProofSteps
       };
     } else {
       return {
