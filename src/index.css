@@ -249,6 +249,18 @@ header h1 {
   border-left: 2px solid #52525b;
   padding-left: 0.5rem;
   margin-bottom: 0.25rem;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.15s ease;
+}
+
+.console-entry:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.console-entry.selected {
+  border-left-color: #a855f7;
+  background: rgba(168, 85, 247, 0.08);
 }
 
 .console-entry.success {

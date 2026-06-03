@@ -326,20 +326,25 @@ export default function App() {
                 </div>
               )}
               
-              {logs.map((step, idx) => (
-                <div 
-                  key={idx} 
-                  className={`console-entry ${idx === logs.length - 1 && !isSearching && proofSteps.length > 0 ? 'success' : ''}`}
-                >
-                  <div className="console-entry-header">
-                    <span>Iteration #{step.kNum}</span>
-                    <span>Queue size: {step.queueLen}</span>
+              {logs.map((step, idx) => {
+                const isSelected = JSON.stringify(selectedFormula) === JSON.stringify(step.currentForm);
+                return (
+                  <div 
+                    key={idx} 
+                    className={`console-entry ${isSelected ? 'selected' : ''} ${idx === logs.length - 1 && !isSearching && proofSteps.length > 0 ? 'success' : ''}`}
+                    onClick={() => setSelectedFormula(step.currentForm)}
+                    title="Click to view AST tree representation"
+                  >
+                    <div className="console-entry-header">
+                      <span>Iteration #{step.kNum}</span>
+                      <span>Queue size: {step.queueLen}</span>
+                    </div>
+                    <div className="console-entry-msg">
+                      Inspecting state: <strong>{formatFormula(step.currentForm)}</strong>
+                    </div>
                   </div>
-                  <div className="console-entry-msg">
-                    Inspecting state: <strong>{formatFormula(step.currentForm)}</strong>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
 
               {errorMsg && (
                 <div style={{ color: '#ef4444', padding: '0.5rem', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.05)', fontSize: '0.8rem' }}>
